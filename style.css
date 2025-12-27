@@ -107,3 +107,11 @@ button,
   cursor: pointer; /* これでPCの時に指マークが出ます */
   touch-action: manipulation; /* スマホでの反応を速くします */
 }
+
+/* すべてのボタンから、クリックした時のグレーや青の枠線を消す */
+button:focus,
+.primary:focus,
+.key:focus,
+.dan-btn:focus {
+  outline: none;
+}
