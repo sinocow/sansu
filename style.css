@@ -275,7 +275,7 @@ body.quiz-active .app-wrapper {
   flex-direction: column;
   justify-content: center; /* 上下中央 */
   align-items: center;     /* 左右中央 */
-  min-height: 100vh;       /* 画面の高さ一杯に広げる */
+  min-height: 100dvh;       /* 画面の高さ一杯に広げる */
   padding: 0;
 }
 
