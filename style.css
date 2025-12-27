@@ -80,9 +80,41 @@ h2 { font-size: 1.1rem; margin-bottom: 15px; text-align: center; }
 .judge.ok { color: var(--good); }
 .judge.ng { color: var(--bad); }
 
-.keys-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.key { padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: #fff; font-size: 18px; font-weight: bold; }
-
+.keys-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px; /* 隙間を広げて隣のボタンとの誤爆を防ぐ */
+}
+.key {
+  /* 縦幅をしっかり確保（400px程度のスマホで最適化） */
+  padding: 20px 0; 
+  height: 65px; 
+  
+  font-size: 24px; /* 数字を大きくして視認性をアップ */
+  font-weight: 800;
+  border-radius: 15px; /* 角を少し丸めて指の当たりを良くする */
+  background: #ffffff;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.keypad {
+  margin-top: 10px;
+  width: 100%;
+}
+/* 押された時の状態：色だけ変える */
+.key.is-pressed {
+  background: #e2e8f0; /* 少し濃いグレー */
+  border-color: #cbd5e1;
+  transform: none; /* 動かさない */
+}
+/* 削除ボタン（⌫）などの特殊ボタンの色を変えて誤操作防止 */
+.key.action {
+  background: #f1f5f9;
+  font-size: 22px;
+  color: var(--muted);
+}
 .result-rank { font-size: 1.1rem; font-weight: 900; color: var(--accent); text-align: center; margin-bottom: 10px; min-height: 1.5em; }
 .result-summary { font-size: 18px; font-weight: bold; text-align: center; }
 .congrats { color: var(--good); font-weight: bold; text-align: center; margin: 5px 0; font-size: 1.2rem; }

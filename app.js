@@ -324,5 +324,21 @@ const updateKukuMenu = () => {
   // ズーム対策
   document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
   document.addEventListener('dblclick', (e) => e.preventDefault(), { passive: false });
+
+const keys = document.querySelectorAll('.key');
+
+keys.forEach(key => {
+  const press = () => key.classList.add('is-pressed');
+  const release = () => key.classList.remove('is-pressed');
+
+  // タッチイベント（スマホ用）
+  key.addEventListener('touchstart', press, { passive: true });
+  key.addEventListener('touchend', release, { passive: true });
+  key.addEventListener('touchcancel', release, { passive: true });
+
+  // マウスイベント（PC用）
+  key.addEventListener('mousedown', press);
+  window.addEventListener('mouseup', release);
+});
   
 })();
