@@ -11,6 +11,7 @@
   let currentQuestionData = { q: '', a: 0 };
   let lastQuestionKey = ""; // 同じ問題防止用
   let customQuestionCount = 10;
+  let questionHistory = {}; // 出題履歴を保存するオブジェクト
 
   const views = {
     main: document.getElementById('view-main-menu'),
@@ -64,38 +65,51 @@
     }, 800);
   };
 
-  // 問題作成ロジック
   const generateQuestion = () => {
-    let qObj = { q: '', a: 0, key: '' };
-    
-    while (true) {
-      if (currentMode === 'kuku') {
-        let left, right;
-        if (kukuSubMode === 'single') {
-          left = selectedDans[0];
-          right = currentIndex + 1; // 1~9の順番
-        } else {
-          left = selectedDans[Math.floor(Math.random() * selectedDans.length)];
-          right = Math.floor(Math.random() * 8) + 2; // 2~9
-        }
-        qObj.q = `${left} × ${right} = ?`;
-        qObj.a = left * right;
-        qObj.key = `${left}x${right}`;
-      } else {
-        const target = currentMode === 'add5' ? 5 : 10;
-        const first = Math.floor(Math.random() * (target - 1)) + 1;
-        qObj.q = `${first} + □ = ${target}`;
-        qObj.a = target - first;
-        qObj.key = `${first}+${target}`;
+    // 1. 全候補リストを作成
+    let pool = [];
+    if (currentMode === 'kuku') {
+      if (kukuSubMode === 'single') {
+        // 「ひとつずつ」は順番通りなので確率制御不要
+        const mult = currentIndex + 1;
+        return { q: `${selectedDans[0]} × ${mult} = ?`, a: selectedDans[0] * mult, key: `kuku_${selectedDans[0]}x${mult}` };
       }
-
-      // 同じ問題が連続しないようにチェック（九九の「ひとつずつ」モード以外）
-      if (kukuSubMode === 'single' && currentMode === 'kuku') break;
-      if (qObj.key !== lastQuestionKey) break;
+      // まぜまぜモード用の全候補
+      selectedDans.forEach(d => {
+        for (let r = 2; r <= 9; r++) pool.push({ l: d, r: r, key: `kuku_${d}x${r}` });
+      });
+    } else {
+      const target = currentMode === 'add5' ? 5 : 10;
+      for (let i = 1; i < target; i++) pool.push({ l: i, r: target, key: `add_${target}_${i}` });
     }
+
+    // 2. 確率（重み）に基づいた抽選
+    // 初期重みは 100 とし、出題回数ごとに 80% ずつ減衰させる
+    let totalWeight = 0;
+    const weightedPool = pool.map(item => {
+      const count = questionHistory[item.key] || 0;
+      // 重み計算：100 * (0.2の累乗) -> 100, 20, 4, 0.8... と激減させる
+      const weight = Math.pow(0.2, count) * 100;
+      
+      // 直前と同じ問題は重みを強制的に 0 にして連続を避ける
+      const finalWeight = (item.key === lastQuestionKey) ? 0 : weight;
+      totalWeight += finalWeight;
+      return { ...item, weight: totalWeight };
+    });
+
+    // 3. 抽選実行
+    const random = Math.random() * totalWeight;
+    const selected = weightedPool.find(item => item.weight >= random);
+
+    // 4. 結果の整形と履歴保存
+    const result = currentMode === 'kuku' 
+      ? { q: `${selected.l} × ${selected.r} = ?`, a: selected.l * selected.r, key: selected.key }
+      : { q: `${selected.l} + □ = ${selected.r}`, a: selected.r - selected.l, key: selected.key };
+
+    questionHistory[selected.key] = (questionHistory[selected.key] || 0) + 1;
+    lastQuestionKey = selected.key;
     
-    lastQuestionKey = qObj.key;
-    return qObj;
+    return result;
   };
 
 // スライダーのイベント（設定部分に追加）
@@ -130,15 +144,17 @@ const startQuiz = () => {
       labels.resultSummary.textContent = `${totalQuestions}もん中 ${correctCount}もん せいかい！`;
       labels.resultTime.textContent = `タイム: ${Math.floor(elapsed/1000)}びょう`;
       
-      const isPerfect = (correctCount === totalQuestions);
-      labels.resultCongrats.classList.toggle('hidden', !isPerfect);
+      // ★正解率90%以上か判定
+      const accuracy = correctCount / totalQuestions;
+      const isGoodAccuracy = accuracy >= 0.9;
       
-      if (isPerfect) {
-        // ここを修正：経過時間(elapsed)と、合計問題数(totalQuestions)を渡す
+      labels.resultCongrats.classList.toggle('hidden', accuracy < 1.0); // 100%の時だけ「ぜんもんせいかい」表示
+      
+      if (isGoodAccuracy) {
         labels.resultRank.textContent = getRank(elapsed, totalQuestions);
         labels.resultRank.style.color = "var(--accent)";
       } else {
-        labels.resultRank.textContent = "ぜんもんせいかいで ランクが でるよ！";
+        labels.resultRank.textContent = "せいかいりつ 90% いじょうで ランクが でるよ！";
         labels.resultRank.style.color = "var(--muted)";
       }
       showView('result');
