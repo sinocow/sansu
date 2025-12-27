@@ -32,15 +32,30 @@
     <section id="view-kuku-menu" class="view">
       <div class="card">
         <button class="btn-back-to-main top-right-menu">もどる</button>
-        <h2><ruby>九九<rt>くく</rt></ruby>：だんを えらぼう</h2>
-        <div class="dan-grid">
-          <button class="dan-btn" data-dan="2">2</button><button class="dan-btn" data-dan="3">3</button>
-          <button class="dan-btn" data-dan="4">4</button><button class="dan-btn" data-dan="5">5</button>
-          <button class="dan-btn" data-dan="6">6</button><button class="dan-btn" data-dan="7">7</button>
-          <button class="dan-btn" data-dan="8">8</button><button class="dan-btn" data-dan="9">9</button>
+        <h2><ruby>九九<rt>くく</rt></ruby>：どうやって あそぶ？</h2>
+        
+        <div class="tab-container">
+          <button id="tab-kuku-single" class="tab-btn active">ひとつずつ</button>
+          <button id="tab-kuku-mixed" class="tab-btn">まぜて ちょうせん</button>
         </div>
+
+        <div id="kuku-selection-area">
+          <p id="kuku-guide-text" style="font-size: 12px; text-align: center; margin-bottom: 8px;">だんを えらぼう（いくつでも OK！）</p>
+          <div class="dan-grid">
+            <button class="dan-btn" data-dan="2">2</button><button class="dan-btn" data-dan="3">3</button>
+            <button class="dan-btn" data-dan="4">4</button><button class="dan-btn" data-dan="5">5</button>
+            <button class="dan-btn" data-dan="6">6</button><button class="dan-btn" data-dan="7">7</button>
+            <button class="dan-btn" data-dan="8">8</button><button class="dan-btn" data-dan="9">9</button>
+          </div>
+        </div>
+
+        <div id="kuku-count-setting" class="count-setting hidden">
+          <p class="setting-label">もんだいすう：<span id="kuku-count-display">10</span>もん</p>
+          <input type="range" id="kuku-count-slider" min="10" max="100" step="10" value="10">
+        </div>
+
         <div class="selection-row">
-          <div class="selection">えらんだ：<strong id="selected-dan-label">なし</strong></div>
+          <div class="selection"><strong id="selected-dan-label">だんを えらんでね</strong></div>
           <button id="btn-kuku-start" class="primary" disabled>スタート！</button>
         </div>
       </div>

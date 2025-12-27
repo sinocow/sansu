@@ -1,7 +1,7 @@
 (() => {
-  // --- 基本設定などはそのまま ---
   let currentMode = '';      
-  let selectedDan = null;    
+  let kukuSubMode = 'single'; // 'single' または 'mixed'
+  let selectedDans = [];     // 複数選択用
   let currentIndex = 0;      
   let totalQuestions = 0;    
   let correctCount = 0;
@@ -9,6 +9,8 @@
   let inputLocked = false;
   let inputBuffer = [];
   let currentQuestionData = { q: '', a: 0 };
+  let lastQuestionKey = ""; // 同じ問題防止用
+  let customQuestionCount = 10;
 
   const views = {
     main: document.getElementById('view-main-menu'),
@@ -33,14 +35,17 @@
   const slotsContainer = document.getElementById('answer-slots');
   const judgeEl = document.getElementById('judge');
 
-  const getRank = (ms) => {
-    const sec = ms / 1000;
-    if (sec < 15) return "しんそくの でんたくサイボーグ ⚡️";
-    if (sec < 25) return "ばくそくの さんすうにんじゃ 🥷";
-    if (sec < 40) return "そろばんの まじゅつし 🪄";
-    if (sec < 60) return "ひらめき てんさいにんげん 💡";
-    if (sec < 90) return "じっくり かんがえる てつがくしゃ 🧐";
-    return "うちゅうの しんりを探求する者 🌌";
+  const getRank = (ms, totalQ) => {
+    // 1問あたりの平均秒数を計算
+    const averageSec = (ms / 1000) / totalQ;
+
+    // 1問あたり何秒で解いたかで判定
+    if (averageSec < 1.8) return "ランクSS: まるでサイボーグ ⚡️";
+    if (averageSec < 2.7) return "ランクS: さんすう にんじゃ 🥷";
+    if (averageSec < 4.4) return "ランクA: そろばんの まじゅつし 🪄";
+    if (averageSec < 6.6) return "ランクB: てんさい にんげん 💡";
+    if (averageSec < 10.0) return "ランクC: ふつうの にんげん 🧐";
+    return "ランクD: ひが くれちゃうよ～";
   };
 
   const showView = (viewKey) => {
@@ -59,34 +64,78 @@
     }, 800);
   };
 
+  // 問題作成ロジック
   const generateQuestion = () => {
-    if (currentMode === 'kuku') {
-      const mult = currentIndex + 1;
-      return { q: `${selectedDan} × ${mult} = ?`, a: selectedDan * mult };
-    } else {
-      const target = currentMode === 'add5' ? 5 : 10;
-      const first = Math.floor(Math.random() * (target - 1)) + 1;
-      return { q: `${first} + □ = ${target}`, a: target - first };
+    let qObj = { q: '', a: 0, key: '' };
+    
+    while (true) {
+      if (currentMode === 'kuku') {
+        let left, right;
+        if (kukuSubMode === 'single') {
+          left = selectedDans[0];
+          right = currentIndex + 1; // 1~9の順番
+        } else {
+          left = selectedDans[Math.floor(Math.random() * selectedDans.length)];
+          right = Math.floor(Math.random() * 8) + 2; // 2~9
+        }
+        qObj.q = `${left} × ${right} = ?`;
+        qObj.a = left * right;
+        qObj.key = `${left}x${right}`;
+      } else {
+        const target = currentMode === 'add5' ? 5 : 10;
+        const first = Math.floor(Math.random() * (target - 1)) + 1;
+        qObj.q = `${first} + □ = ${target}`;
+        qObj.a = target - first;
+        qObj.key = `${first}+${target}`;
+      }
+
+      // 同じ問題が連続しないようにチェック（九九の「ひとつずつ」モード以外）
+      if (kukuSubMode === 'single' && currentMode === 'kuku') break;
+      if (qObj.key !== lastQuestionKey) break;
     }
+    
+    lastQuestionKey = qObj.key;
+    return qObj;
   };
 
-  const startQuiz = () => {
-    currentIndex = 0; correctCount = 0;
-    totalQuestions = currentMode === 'kuku' ? 9 : 10;
-    showView('quiz');
-    startTimeMs = Date.now();
-    nextQuestion();
-  };
+// スライダーのイベント（設定部分に追加）
+const slider = document.getElementById('kuku-count-slider');
+const display = document.getElementById('kuku-count-display');
+slider.addEventListener('input', (e) => {
+  customQuestionCount = parseInt(e.target.value);
+  display.textContent = customQuestionCount;
+});
+
+// startQuiz 関数を修正
+const startQuiz = () => {
+  currentIndex = 0; 
+  correctCount = 0; 
+  lastQuestionKey = "";
+  
+  // 問題数を決定
+  if (currentMode === 'kuku') {
+    totalQuestions = (kukuSubMode === 'single') ? 9 : customQuestionCount;
+  } else {
+    totalQuestions = 10; // あわせていくつは10問固定
+  }
+  
+  showView('quiz');
+  startTimeMs = Date.now();
+  nextQuestion();
+};
 
   const nextQuestion = () => {
     if (currentIndex >= totalQuestions) {
       const elapsed = Date.now() - startTimeMs;
       labels.resultSummary.textContent = `${totalQuestions}もん中 ${correctCount}もん せいかい！`;
       labels.resultTime.textContent = `タイム: ${Math.floor(elapsed/1000)}びょう`;
+      
       const isPerfect = (correctCount === totalQuestions);
       labels.resultCongrats.classList.toggle('hidden', !isPerfect);
+      
       if (isPerfect) {
-        labels.resultRank.textContent = getRank(elapsed);
+        // ここを修正：経過時間(elapsed)と、合計問題数(totalQuestions)を渡す
+        labels.resultRank.textContent = getRank(elapsed, totalQuestions);
         labels.resultRank.style.color = "var(--accent)";
       } else {
         labels.resultRank.textContent = "ぜんもんせいかいで ランクが でるよ！";
@@ -99,7 +148,14 @@
     inputBuffer = []; inputLocked = false;
     labels.quizProgress.textContent = `${currentIndex + 1}/${totalQuestions}`;
     labels.quizQuestion.textContent = currentQuestionData.q;
-    labels.quizMode.textContent = currentMode === 'kuku' ? `${selectedDan}のだん` : (currentMode === 'add5' ? 'あわせて5' : 'あわせて10');
+    
+    let modeName = "";
+    if (currentMode === 'kuku') {
+      modeName = kukuSubMode === 'single' ? `${selectedDans[0]}のだん` : "くく（まぜまぜ）";
+    } else {
+      modeName = currentMode === 'add5' ? 'あわせて5' : 'あわせて10';
+    }
+    labels.quizMode.textContent = modeName;
     renderSlots();
   };
 
@@ -128,63 +184,98 @@
     }
   };
 
-  // --- キーボード入力のイベントリスナー ---
-  document.addEventListener('keydown', (e) => {
-    // 1. クイズ中の数字入力
-    if (views.quiz.classList.contains('active')) {
-      if (e.key >= '0' && e.key <= '9') {
-        handleInput(e.key);
-      }
-      if (e.key === 'Backspace') {
-        inputBuffer.pop();
-        renderSlots();
+  // --- イベント設定 ---
+
+  // 九九メニューの状態を更新する関数
+const updateKukuMenu = () => {
+  selectedDans = [];
+  document.querySelectorAll('.dan-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-kuku-start').disabled = true;
+  
+  const guideText = document.getElementById('kuku-guide-text');
+  const countSetting = document.getElementById('kuku-count-setting'); // 追加
+  
+  if (kukuSubMode === 'single') {
+    guideText.textContent = "だんを えらぼう";
+    labels.dan.textContent = "だんを えらんでね";
+    countSetting.classList.add('hidden'); // ひとつずつモードでは隠す
+  } else {
+    guideText.textContent = "だんを えらぼう（いくつでも OK！）";
+    labels.dan.textContent = "だんを えらぼう（複数選択可）";
+    countSetting.classList.remove('hidden'); // まぜまぜモードで表示
+  }
+};
+
+  // タブ切り替えイベント
+  document.getElementById('tab-kuku-single').addEventListener('click', (e) => {
+    kukuSubMode = 'single';
+    document.getElementById('tab-kuku-mixed').classList.remove('active');
+    document.getElementById('tab-kuku-single').classList.add('active');
+    updateKukuMenu();
+  });
+
+  document.getElementById('tab-kuku-mixed').addEventListener('click', (e) => {
+    kukuSubMode = 'mixed';
+    document.getElementById('tab-kuku-single').classList.remove('active');
+    document.getElementById('tab-kuku-mixed').classList.add('active');
+    updateKukuMenu();
+  });
+
+  // 段ボタンクリック
+  document.querySelectorAll('.dan-btn').forEach(btn => btn.addEventListener('click', () => {
+    const dan = parseInt(btn.dataset.dan);
+    if (kukuSubMode === 'single') {
+      selectedDans = [dan];
+      document.querySelectorAll('.dan-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    } else {
+      if (selectedDans.includes(dan)) {
+        selectedDans = selectedDans.filter(d => d !== dan);
+        btn.classList.remove('active');
+      } else {
+        selectedDans.push(dan);
+        btn.classList.add('active');
       }
     }
+    
+    const startBtn = document.getElementById('btn-kuku-start');
+    if (selectedDans.length > 0) {
+      labels.dan.textContent = selectedDans.sort().join(', ') + " のだん";
+      startBtn.disabled = false;
+    } else {
+      labels.dan.textContent = "だんを えらんでね";
+      startBtn.disabled = true;
+    }
+    setTimeout(() => startBtn.blur(), 10);
+  }));
 
-    // 2. エンターキーの挙動
+  // キーボード・その他
+  document.addEventListener('keydown', (e) => {
+    if (views.quiz.classList.contains('active')) {
+      if (e.key >= '0' && e.key <= '9') handleInput(e.key);
+      if (e.key === 'Backspace') { inputBuffer.pop(); renderSlots(); }
+    }
     if (e.key === 'Enter') {
-      // 結果画面ならメニューに戻る
-      if (views.result.classList.contains('active')) {
-        showView('main');
-      }
-      // 九九の段選択中、スタートボタンが有効なら開始
+      if (views.result.classList.contains('active')) showView('main');
       else if (views.kuku.classList.contains('active')) {
-        const startBtn = document.getElementById('btn-kuku-start');
-        if (!startBtn.disabled) {
-          currentMode = 'kuku';
-          runCountdown(startQuiz);
-        }
+        const b = document.getElementById('btn-kuku-start');
+        if (!b.disabled) { currentMode = 'kuku'; runCountdown(startQuiz); }
       }
     }
   });
 
-  // --- ボタンクリックのイベント ---
   document.querySelectorAll('.menu-large-btn').forEach(b => b.addEventListener('click', () => showView(b.dataset.modeType === 'kuku' ? 'kuku' : 'addition')));
-  document.querySelectorAll('.dan-btn').forEach(b => b.addEventListener('click', () => {
-    selectedDan = parseInt(b.dataset.dan);
-    document.querySelectorAll('.dan-btn').forEach(btn => btn.classList.remove('active'));
-    b.classList.add('active');
-    labels.dan.textContent = `${selectedDan}のだん`;
-    document.getElementById('btn-kuku-start').disabled = false;
-    setTimeout(() => {
-      startBtn.blur();
-    }, 10);
-  }));
   document.getElementById('btn-kuku-start').addEventListener('click', () => { currentMode = 'kuku'; runCountdown(startQuiz); });
   document.querySelectorAll('.mode-btn').forEach(b => b.addEventListener('click', () => { currentMode = b.dataset.addMode === '5' ? 'add5' : 'add10'; runCountdown(startQuiz); }));
-  document.querySelectorAll('.btn-back-to-main, #btn-quick-menu, #btn-back-to-menu').forEach(b => b.addEventListener('click', () => showView('main')));
+  document.querySelectorAll('.btn-back-to-main, #btn-quick-menu, #btn-back-to-menu').forEach(b => b.addEventListener('click', () => {
+    updateKukuMenu(); // リセット
+    showView('main');
+  }));
   document.querySelectorAll('.key[data-digit]').forEach(b => b.addEventListener('click', () => handleInput(b.dataset.digit)));
   document.querySelector('[data-action="backspace"]').addEventListener('click', () => { inputBuffer.pop(); renderSlots(); });
 
-  // iPhone Safariのダブルタップズームを強制的に禁止する
-document.addEventListener('touchstart', (e) => {
-  if (e.touches.length > 1) {
-    e.preventDefault(); // 2本指以上の操作（ピンチズーム）を禁止
-  }
-}, { passive: false });
-
-// ダブルタップによるズーム動作だけをキャンセルする（ボタンの連打は邪魔しない）
-document.addEventListener('dblclick', (e) => {
-  e.preventDefault();
-}, { passive: false });
+  // ズーム対策
+  document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  document.addEventListener('dblclick', (e) => e.preventDefault(), { passive: false });
+  
 })();
