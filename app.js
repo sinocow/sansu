@@ -220,18 +220,48 @@ const handleInput = (digit) => {
     
     if (isOk) {
       correctCount++;
+      judgeEl.textContent = '〇';
+      judgeEl.className = 'judge show ok';
+      
+      // 正解時はそのまま次の問題へ
+      setTimeout(() => { 
+        judgeEl.classList.remove('show'); 
+        currentIndex++; 
+        nextQuestion(); 
+      }, 400);
+
     } else {
-      // ★間違えた問題を記録（式、正解、ユーザーの回答を保存）
+      // --- 不正解時の処理 ---
       mistakes.push({
-        q: currentQuestionData.q.replace('?', ''), // "2 × 3 = " の形に
+        q: currentQuestionData.q.replace('?', ''),
         correct: currentQuestionData.a,
         user: userAnswer
       });
+
+      judgeEl.textContent = '×';
+      judgeEl.className = 'judge show ng';
+
+      // 1. まずは入力した数字をそのまま見せる (0.2秒)
+      // (renderSlotsですでに入力内容は表示されています)
+
+      // 2. 0.2秒後に、スロットを「正解」に書き換える
+      setTimeout(() => {
+        const slots = slotsContainer.querySelectorAll('.slot');
+        const correctStr = String(currentQuestionData.a).padStart(len, '0');
+        
+        slots.forEach((slot, i) => {
+          slot.textContent = correctStr[i];
+          slot.classList.add('is-error'); // 赤字にする
+        });
+      }, 200);
+
+      // 3. 正解を確認させる時間を作ってから次へ (合計0.7秒くらいに伸ばす)
+      setTimeout(() => { 
+        judgeEl.classList.remove('show'); 
+        currentIndex++; 
+        nextQuestion(); 
+      }, 750);
     }
-    
-    judgeEl.textContent = isOk ? '〇' : '×';
-    judgeEl.className = `judge show ${isOk ? 'ok' : 'ng'}`;
-    setTimeout(() => { judgeEl.classList.remove('show'); currentIndex++; nextQuestion(); }, 400);
   }
 };
 

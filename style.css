@@ -302,3 +302,18 @@ body.quiz-active .app-wrapper {
     justify-content: center; 
   }
 }
+
+/* 間違えた時にスロットの数字を赤く太くする */
+.slot.is-error {
+  color: #dc2626; /* 鮮やかな赤 */
+  border-color: #dc2626;
+  font-weight: 800;
+  animation: shake 0.2s ease-in-out; /* 軽く揺れる演出を入れるとさらに分かりやすい */
+}
+
+/* 軽く左右に揺れるアニメーション（任意） */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
