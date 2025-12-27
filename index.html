@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>算数チャレンジ</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <script src="app.js" defer></script>
+  <div class="app-wrapper">
+    <header class="app-header">
+      <h1><ruby>算数<rt>さんすう</rt></ruby>チャレンジ</h1>
+    </header>
+
+    <section id="view-main-menu" class="view active">
+      <div class="card">
+        <h2>なにに <ruby>挑戦<rt>ちょうせん</rt></ruby>する？</h2>
+        <div class="menu-grid">
+          <button class="menu-large-btn" data-mode-type="kuku">
+            <span class="icon">✖️</span>
+            <span class="label"><ruby>九九<rt>くく</rt></ruby></span>
+          </button>
+          <button class="menu-large-btn" data-mode-type="addition">
+            <span class="icon">➕</span>
+            <span class="label">あわせていくつ</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-kuku-menu" class="view">
+      <div class="card">
+        <button class="btn-back-to-main top-right-menu">もどる</button>
+        <h2><ruby>九九<rt>くく</rt></ruby>：だんを えらぼう</h2>
+        <div class="dan-grid">
+          <button class="dan-btn" data-dan="2">2</button><button class="dan-btn" data-dan="3">3</button>
+          <button class="dan-btn" data-dan="4">4</button><button class="dan-btn" data-dan="5">5</button>
+          <button class="dan-btn" data-dan="6">6</button><button class="dan-btn" data-dan="7">7</button>
+          <button class="dan-btn" data-dan="8">8</button><button class="dan-btn" data-dan="9">9</button>
+        </div>
+        <div class="selection-row">
+          <div class="selection">えらんだ：<strong id="selected-dan-label">なし</strong></div>
+          <button id="btn-kuku-start" class="primary" disabled>スタート！</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-addition-menu" class="view">
+      <div class="card">
+        <button class="btn-back-to-main top-right-menu">もどる</button>
+        <h2>あわせて いくつ？</h2>
+        <div class="mode-selection-grid">
+          <button class="mode-btn" data-add-mode="5">
+            <span class="title">あわせて 5</span>
+            <span class="desc">3 + □ = 5 に <ruby>挑戦<rt>ちょうせん</rt></ruby>！</span>
+          </button>
+          <button class="mode-btn" data-add-mode="10">
+            <span class="title">あわせて 10</span>
+            <span class="desc">7 + □ = 10 に <ruby>挑戦<rt>ちょうせん</rt></ruby>！</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <div id="countdown-overlay" class="overlay hidden">
+      <div id="countdown-number" class="count">3</div>
+    </div>
+
+    <section id="view-quiz" class="view">
+      <div class="card">
+        <button id="btn-quick-menu" class="top-right-menu">やめる</button>
+        <div class="quiz-top">
+          <div class="quiz-meta">
+            <span id="quiz-mode-label" class="badge">もーど</span>
+            <span id="quiz-progress" class="progress">0/10</span>
+          </div>
+          <h2 id="quiz-question" class="question">1 + □ = 5</h2>
+        </div>
+        <div class="answer-area">
+          <div id="judge" class="judge" aria-hidden="true"></div>
+          <div class="answer-slots" id="answer-slots"></div>
+        </div>
+        <div class="keypad">
+          <div class="keys-grid">
+            <button class="key" data-digit="7">7</button><button class="key" data-digit="8">8</button><button class="key" data-digit="9">9</button>
+            <button class="key" data-digit="4">4</button><button class="key" data-digit="5">5</button><button class="key" data-digit="6">6</button>
+            <button class="key" data-digit="1">1</button><button class="key" data-digit="2">2</button><button class="key" data-digit="3">3</button>
+            <button class="key action" data-action="backspace">⌫</button><button class="key" data-digit="0">0</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-result" class="view">
+      <div class="card">
+        <h2>けっかはっぴょう！</h2>
+        <p id="result-rank" class="result-rank"></p>
+        <p id="result-summary" class="result-summary">-</p>
+        <p id="result-congrats" class="congrats hidden">ぜんもんせいかい！すごい！🎉</p>
+        <p id="result-time" class="result-time">-</p>
+        <div class="actions">
+          <button id="btn-back-to-menu" class="primary">メニューへ</button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="app-footer">
+      <small>© 井内の さんすうチャレンジ</small>
+    </footer>
+  </div>
+</body>
+</html>
