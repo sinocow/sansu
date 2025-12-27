@@ -113,16 +113,21 @@ button,
   touch-action: manipulation; /* スマホでの反応を速くします */
 }
 
-/* すべてのボタンから、クリックした時のグレーや青の枠線を消す */
-button:focus,
+/* フォーカス時の枠を徹底的に消す（!importantで最優先にする） */
+button:focus, 
+button:active, 
+button:focus-visible,
 .primary:focus,
-.key:focus,
-.dan-btn:focus {
-  outline: none;
+.primary:active {
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent !important;
 }
 
-button::-moz-focus-inner {
-  border: 0;
+/* iOS Safariでボタンが有効になった時の青い影などを消す */
+button:disabled {
+  opacity: 0.5; /* 無効化されていることがわかるように透明度だけ調整 */
+  cursor: not-allowed;
 }
 
 button {

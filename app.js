@@ -163,8 +163,12 @@
   document.querySelectorAll('.dan-btn').forEach(b => b.addEventListener('click', () => {
     selectedDan = parseInt(b.dataset.dan);
     document.querySelectorAll('.dan-btn').forEach(btn => btn.classList.remove('active'));
-    b.classList.add('active'); labels.dan.textContent = `${selectedDan}のだん`;
+    b.classList.add('active');
+    labels.dan.textContent = `${selectedDan}のだん`;
     document.getElementById('btn-kuku-start').disabled = false;
+    setTimeout(() => {
+      startBtn.blur();
+    }, 10);
   }));
   document.getElementById('btn-kuku-start').addEventListener('click', () => { currentMode = 'kuku'; runCountdown(startQuiz); });
   document.querySelectorAll('.mode-btn').forEach(b => b.addEventListener('click', () => { currentMode = b.dataset.addMode === '5' ? 'add5' : 'add10'; runCountdown(startQuiz); }));
