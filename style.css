@@ -203,3 +203,36 @@ input[type="range"]::-webkit-slider-thumb {
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
+
+.mistake-container {
+  margin-top: 15px;
+  padding: 10px;
+  background: rgba(241, 245, 249, 0.5); /* 薄いグレー */
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+.mistake-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2列にして高さを抑える */
+  gap: 5px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.mistake-item {
+  font-size: 13px; /* 小さめ */
+  color: var(--muted);
+  background: #fff;
+  padding: 4px 8px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid #f1f5f9;
+}
+
+.mistake-ans {
+  color: #dc2626; /* 赤色で正解を表示 */
+  font-weight: bold;
+  margin-left: 8px;
+}

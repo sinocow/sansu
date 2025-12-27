@@ -12,6 +12,7 @@
   let lastQuestionKey = ""; // 同じ問題防止用
   let customQuestionCount = 10;
   let questionHistory = {}; // 出題履歴を保存するオブジェクト
+  let mistakes = [];
 
   const views = {
     main: document.getElementById('view-main-menu'),
@@ -124,6 +125,7 @@ slider.addEventListener('input', (e) => {
 const startQuiz = () => {
   currentIndex = 0; 
   correctCount = 0; 
+  mistakes = [];
   lastQuestionKey = "";
   
   // 問題数を決定
@@ -144,9 +146,9 @@ const startQuiz = () => {
       labels.resultSummary.textContent = `${totalQuestions}もん中 ${correctCount}もん せいかい！`;
       labels.resultTime.textContent = `タイム: ${Math.floor(elapsed/1000)}びょう`;
       
-      // ★正解率90%以上か判定
+      // ★正解率85%以上か判定
       const accuracy = correctCount / totalQuestions;
-      const isGoodAccuracy = accuracy >= 0.9;
+      const isGoodAccuracy = accuracy >= 0.85;
       
       labels.resultCongrats.classList.toggle('hidden', accuracy < 1.0); // 100%の時だけ「ぜんもんせいかい」表示
       
@@ -154,8 +156,25 @@ const startQuiz = () => {
         labels.resultRank.textContent = getRank(elapsed, totalQuestions);
         labels.resultRank.style.color = "var(--accent)";
       } else {
-        labels.resultRank.textContent = "せいかいりつ 90% いじょうで ランクが でるよ！";
+        labels.resultRank.textContent = "もっと せいかいすると ランクが でるよ！";
         labels.resultRank.style.color = "var(--muted)";
+      }
+
+      // ★間違えたリストの表示
+      const mistakeContainer = document.getElementById('mistake-container');
+      const mistakeList = document.getElementById('mistake-list');
+      mistakeList.innerHTML = ''; // クリア
+
+      if (mistakes.length > 0) {
+        mistakeContainer.classList.remove('hidden');
+        mistakes.forEach(m => {
+          const div = document.createElement('div');
+          div.className = 'mistake-item';
+          div.innerHTML = `<span>${m.q}</span><span class="mistake-ans">${m.correct}</span>`;
+          mistakeList.appendChild(div);
+        });
+      } else {
+        mistakeContainer.classList.add('hidden');
       }
       showView('result');
       return;
@@ -186,19 +205,31 @@ const startQuiz = () => {
     }
   };
 
-  const handleInput = (digit) => {
-    if (inputLocked) return;
-    const len = String(currentQuestionData.a).length;
-    if (inputBuffer.length < len) { inputBuffer.push(digit); renderSlots(); }
-    if (inputBuffer.length === len) {
-      inputLocked = true;
-      const isOk = parseInt(inputBuffer.join(''), 10) === currentQuestionData.a;
-      if (isOk) correctCount++;
-      judgeEl.textContent = isOk ? '〇' : '×';
-      judgeEl.className = `judge show ${isOk ? 'ok' : 'ng'}`;
-      setTimeout(() => { judgeEl.classList.remove('show'); currentIndex++; nextQuestion(); }, 400);
+const handleInput = (digit) => {
+  if (inputLocked) return;
+  const len = String(currentQuestionData.a).length;
+  if (inputBuffer.length < len) { inputBuffer.push(digit); renderSlots(); }
+  if (inputBuffer.length === len) {
+    inputLocked = true;
+    const userAnswer = parseInt(inputBuffer.join(''), 10);
+    const isOk = userAnswer === currentQuestionData.a;
+    
+    if (isOk) {
+      correctCount++;
+    } else {
+      // ★間違えた問題を記録（式、正解、ユーザーの回答を保存）
+      mistakes.push({
+        q: currentQuestionData.q.replace('?', ''), // "2 × 3 = " の形に
+        correct: currentQuestionData.a,
+        user: userAnswer
+      });
     }
-  };
+    
+    judgeEl.textContent = isOk ? '〇' : '×';
+    judgeEl.className = `judge show ${isOk ? 'ok' : 'ng'}`;
+    setTimeout(() => { judgeEl.classList.remove('show'); currentIndex++; nextQuestion(); }, 400);
+  }
+};
 
   // --- イベント設定 ---
 
