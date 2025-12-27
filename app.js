@@ -53,6 +53,9 @@
   const showView = (viewKey) => {
     Object.values(views).forEach(v => v.classList.remove('active'));
     views[viewKey].classList.add('active');
+    if (viewKey !== 'quiz') {
+      document.body.classList.remove('quiz-active');
+    }
   };
 
   const runCountdown = (callback) => {
@@ -127,6 +130,7 @@ const startQuiz = () => {
   correctCount = 0; 
   mistakes = [];
   lastQuestionKey = "";
+  document.body.classList.add('quiz-active'); // クイズ中フラグ
   
   // 問題数を決定
   if (currentMode === 'kuku') {

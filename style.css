@@ -268,3 +268,37 @@ input[type="range"]::-webkit-slider-thumb {
   font-weight: bold;
   margin-left: 8px;
 }
+
+/* クイズ画面が表示されている時、中身を上下中央に寄せる */
+body.quiz-active .app-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* 上下中央 */
+  align-items: center;     /* 左右中央 */
+  min-height: 100vh;       /* 画面の高さ一杯に広げる */
+  padding: 0;
+}
+
+/* もし .view-quiz 自体にマージンがついている場合はリセット */
+#view-quiz.active {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width: 400px; /* 横に広がりすぎないように */
+  margin: 0 auto;
+}
+
+/* 画面の高さが 700px 以下のデバイス向けの設定 */
+@media screen and (max-height: 700px) {
+  /* タイトル（ヘッダー）を消す */
+  body.quiz-active .app-header {
+    display: none;
+  }
+  body.quiz-active .app-footer {
+    display: none;
+  }
+  body.quiz-active .app-wrapper {
+    justify-content: center; 
+  }
+}
