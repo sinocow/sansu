@@ -10,7 +10,7 @@
   --border: #e5e7eb;
 }
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 html, body { height: 100%; margin: 0; overflow: hidden; }
 body { font-family: system-ui, sans-serif; background: var(--bg-gradient); color: var(--text); }
 
@@ -85,3 +85,25 @@ h2 { font-size: 1.1rem; margin-bottom: 15px; text-align: center; }
 .overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); display: grid; place-items: center; z-index: 100; }
 .count { font-size: 100px; color: var(--accent); font-weight: 900; }
 .hidden { display: none !important; }
+
+* { 
+  box-sizing: border-box; 
+  -webkit-tap-highlight-color: transparent; /* タップした時の青い枠を消す */
+  touch-action: manipulation;               /* ダブルタップズームを無効にする（最新ブラウザ用） */
+}
+
+.card, .key, .dan-btn, .menu-large-btn, .top-right-menu {
+  /* ボタンやカードなど、操作したい部分だけスクロールやタップを許可します */
+  touch-action: manipulation;
+}
+
+/* 2. ボタン類に指マーク（ポインター）を強制する */
+button, 
+.key, 
+.dan-btn, 
+.menu-large-btn, 
+.mode-btn, 
+.top-right-menu {
+  cursor: pointer; /* これでPCの時に指マークが出ます */
+  touch-action: manipulation; /* スマホでの反応を速くします */
+}

@@ -171,4 +171,20 @@
   document.querySelectorAll('.btn-back-to-main, #btn-quick-menu, #btn-back-to-menu').forEach(b => b.addEventListener('click', () => showView('main')));
   document.querySelectorAll('.key[data-digit]').forEach(b => b.addEventListener('click', () => handleInput(b.dataset.digit)));
   document.querySelector('[data-action="backspace"]').addEventListener('click', () => { inputBuffer.pop(); renderSlots(); });
+
+  // iPhone Safariのダブルタップズームを強制的に禁止する
+document.addEventListener('touchstart', (e) => {
+  if (e.touches.length > 1) {
+    e.preventDefault(); // 2本指以上の操作（ピンチズーム）を禁止
+  }
+}, { passive: false });
+
+let lastTouchEnd = 0;
+document.addEventListener('touchend', (e) => {
+  const now = (new Date()).getTime();
+  if (now - lastTouchEnd <= 300) {
+    e.preventDefault(); // 0.3秒以内の連続タップ（ダブルタップズーム）を禁止
+  }
+  lastTouchEnd = now;
+}, false);
 })();
