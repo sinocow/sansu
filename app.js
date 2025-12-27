@@ -183,12 +183,12 @@ document.addEventListener('touchstart', (e) => {
   }
 }, { passive: false });
 
-let lastTouchEnd = 0;
-document.addEventListener('touchend', (e) => {
-  const now = (new Date()).getTime();
-  if (now - lastTouchEnd <= 300) {
-    e.preventDefault(); // 0.3秒以内の連続タップ（ダブルタップズーム）を禁止
-  }
-  lastTouchEnd = now;
-}, false);
+// let lastTouchEnd = 0;
+// document.addEventListener('touchend', (e) => {
+//   const now = (new Date()).getTime();
+//   if (now - lastTouchEnd <= 300) {
+//     e.preventDefault(); // 0.3秒以内の連続タップ（ダブルタップズーム）を禁止
+//   }
+//   lastTouchEnd = now;
+// }, false);
 })();
