@@ -10,6 +10,15 @@
   --border: #e5e7eb;
 }
 
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent; /* タップした瞬間の色を消す */
+  -webkit-user-select: none;                /* テキスト選択を禁止（枠問題の解決） */
+  user-select: none;
+  outline: none !important;                 /* あらゆる枠線を強制排除 */
+  touch-action: manipulation;               /* ダブルタップズームを無効にする（最新ブラウザ用） */
+}
+
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 html, body { height: 100%; margin: 0; overflow: hidden; }
 body { font-family: system-ui, sans-serif; background: var(--bg-gradient); color: var(--text); }
@@ -17,7 +26,7 @@ body { font-family: system-ui, sans-serif; background: var(--bg-gradient); color
 /* ルビのサイズ調整 */
 rt { font-size: 0.55em; color: var(--muted); }
 
-.app-wrapper { height: 100vh; display: grid; grid-template-rows: auto 1fr auto; }
+.app-wrapper { height: 100dvh; display: grid; grid-template-rows: auto 1fr auto; }
 .app-header h1 { font-size: 1.4rem; margin: 8px 0; text-align: center; color: var(--primary); }
 .app-footer { padding: 8px; text-align: center; font-size: 10px; color: var(--muted); }
 
@@ -86,11 +95,7 @@ h2 { font-size: 1.1rem; margin-bottom: 15px; text-align: center; }
 .count { font-size: 100px; color: var(--accent); font-weight: 900; }
 .hidden { display: none !important; }
 
-* { 
-  box-sizing: border-box; 
-  -webkit-tap-highlight-color: transparent; /* タップした時の青い枠を消す */
-  touch-action: manipulation;               /* ダブルタップズームを無効にする（最新ブラウザ用） */
-}
+
 
 .card, .key, .dan-btn, .menu-large-btn, .top-right-menu {
   /* ボタンやカードなど、操作したい部分だけスクロールやタップを許可します */
@@ -118,4 +123,9 @@ button:focus,
 
 button::-moz-focus-inner {
   border: 0;
+}
+
+button {
+  -webkit-appearance: none; /* iOS特有のボタン装飾をリセット */
+  appearance: none;
 }
